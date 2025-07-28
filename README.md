@@ -6,7 +6,7 @@ This project is a collection of standalone Python tools, each in its own folder 
 
 ## 📦 Available Tools
 
-### 🔐 [pass_forge](./pass_forge)
+### 🔐 [password_forger](./PassForge)
 A password encoder & generator supporting multiple encodings, truncation, and symbol appending.
 
 ### 📁 [file_hash](./file_hash)
