@@ -1,0 +1,2 @@
+pyperclip>=1.8        # Optional: clipboard copy support
+tk                    # Built-in with Python, but listed for completeness
