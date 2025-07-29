@@ -4,6 +4,9 @@ import hashlib
 import base64
 import tkinter as tk
 from tkinter import ttk, messagebox, scrolledtext
+import colorama
+colorama.init()
+use_color = True
 
 # Check if pyperclip is available for clipboard operations
 # If not, we will skip clipboard functionality
@@ -72,16 +75,16 @@ def generate_recommendation(base64_encoded, limit, symbol):
     base64_part = base64_encoded[:limit] if limit else base64_encoded
     return base64_part + (symbol if symbol else "")
 
-def format_output(results, recommend, symbol=None):
+def format_output(results, recommend, symbol=None, use_color=True):
     """
     Format the output with colored and aligned text,
     includes dividing lines and highlights recommended password.
     """
-    RESET = "\033[0m"
-    BOLD = "\033[1m"
-    CYAN = "\033[36m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
+    RESET = "\033[0m" if use_color else ""
+    BOLD = "\033[1m" if use_color else ""
+    CYAN = "\033[36m" if use_color else ""
+    GREEN = "\033[32m" if use_color else ""
+    YELLOW = "\033[33m" if use_color else ""
     LINE = CYAN + ("-" * 50) + RESET
 
     lines = [LINE]
@@ -92,7 +95,10 @@ def format_output(results, recommend, symbol=None):
         if symbol and v.endswith(symbol):
             core = v[:-len(symbol)]
             suffix = symbol
-            line = f"{k.upper():<12} | {core}{YELLOW}{suffix}{RESET}"
+            if use_color:
+                line = f"{k.upper():<12} | {core}{YELLOW}{suffix}{RESET}"
+            else:
+                line = f"{k.upper():<12} | {core}{suffix}"
         else:
             line = f"{k.upper():<12} | {v}"
         lines.append(line)
@@ -122,7 +128,7 @@ def run_cli():
     recommend = generate_recommendation(all_results['base64'], args.limit or 12, args.symbol)
 
     if args.mode == 'all':
-        output_text = format_output(all_results, recommend, args.symbol)
+        output_text = format_output(all_results, recommend, args.symbol, use_color=True)
     elif args.mode == 'recommend':
         output_text = f"✅ Recommended Password: {recommend}"
     else:
@@ -166,7 +172,7 @@ def run_gui():
         recommend = generate_recommendation(all_results['base64'], limit or 12, symbol)
 
         if mode == 'all':
-            output_text = format_output(all_results, recommend, symbol)
+            output_text = format_output(all_results, recommend, symbol, use_color=False)
         elif mode == 'recommend':
             output_text = f"✅ Recommended Password: {recommend}"
         else:
@@ -194,9 +200,15 @@ def run_gui():
     frame = ttk.Frame(root, padding=10)
     frame.pack(fill=tk.BOTH, expand=True)
 
+    # Assign grid layout to the frame
+    frame.grid_rowconfigure(5, weight=1)  # ScrolledText stretchable
+    frame.grid_columnconfigure(1, weight=1)  # Firstt column stretchable
+
+    # Input grid
     ttk.Label(frame, text="Input string (master password + site):").grid(row=0, column=0, sticky=tk.W)
     entry_input = ttk.Entry(frame, width=40)
-    entry_input.grid(row=0, column=1, sticky=tk.W)
+    entry_input.grid(row=0, column=1, sticky=tk.EW)  # Horizontal stretch
+    entry_input.insert(0, "Penrhyn@Slate")
 
     ttk.Label(frame, text="Base64 truncate length:").grid(row=1, column=0, sticky=tk.W)
     entry_limit = ttk.Entry(frame, width=10)
@@ -217,7 +229,7 @@ def run_gui():
     btn_generate.grid(row=4, column=0, columnspan=2, pady=5)
 
     text_result = scrolledtext.ScrolledText(frame, width=60, height=15, state='disabled')
-    text_result.grid(row=5, column=0, columnspan=2, pady=5)
+    text_result.grid(row=5, column=0, columnspan=2, pady=5, sticky=tk.NSEW)  # Modified to use ScrolledText
 
     btn_copy = ttk.Button(frame, text="Copy Result", command=on_copy)
     btn_copy.grid(row=6, column=0, columnspan=2)
